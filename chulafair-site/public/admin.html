@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>จัดการเว็บไซต์ · จุฬาฯแฟร์</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=MuseoModerno:wght@700&display=swap">
+<link rel="stylesheet" href="/assets/admin.css?v=1">
+</head>
+<body>
+<header class="bar">
+  <a class="bar-brand" href="#/"><span class="mark" aria-hidden="true"><i></i></span><span>จุฬาฯแฟร์ <small>จัดการเว็บไซต์</small></span></a>
+  <nav class="bar-nav" id="bar-nav" hidden>
+    <a href="#/" data-nav="list">หน้า &amp; บล็อก</a>
+    <a href="#/settings" data-nav="settings">ข้อความหน้าแรก</a>
+    <a href="/" target="_blank" rel="noopener">ดูเว็บไซต์ ↗</a>
+  </nav>
+  <div class="bar-user" id="bar-user" hidden>
+    <span id="who"></span>
+    <button type="button" class="link" id="logout">ออกจากระบบ</button>
+  </div>
+</header>
+<main id="app" aria-live="polite"><p class="loading">กำลังโหลด…</p></main>
+<div class="toast" id="toast" role="status" hidden></div>
+<script src="/assets/admin.js?v=1"></script>
+</body>
+</html>

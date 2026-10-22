@@ -1,0 +1,29 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "rewrites": [
+    { "source": "/", "destination": "/api/render?home=1" },
+    { "source": "/blog", "destination": "/api/render?blog=1" },
+    { "source": "/sitemap.xml", "destination": "/api/render?sitemap=1" },
+    { "source": "/blog/:slug", "destination": "/api/render?post=:slug" },
+    { "source": "/p/:slug", "destination": "/api/render?page=:slug" }
+  ],
+  "redirects": [
+    { "source": "/staff", "destination": "https://task.chulafair.com", "permanent": false }
+  ],
+  "headers": [
+    {
+      "source": "/admin",
+      "headers": [
+        { "key": "x-robots-tag", "value": "noindex, nofollow" },
+        { "key": "cache-control", "value": "no-store" },
+        { "key": "x-frame-options", "value": "DENY" }
+      ]
+    },
+    {
+      "source": "/assets/(.*)",
+      "headers": [{ "key": "cache-control", "value": "public, max-age=3600, stale-while-revalidate=86400" }]
+    }
+  ]
+}
