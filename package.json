@@ -1,0 +1,20 @@
+{
+  "name": "chulafair-site",
+  "version": "1.0.0",
+  "private": true,
+  "description": "chulafair.com — the public website of ChulaFAIR 2027, edited by CUFTM admins and co-admins.",
+  "type": "module",
+  "engines": {
+    "node": "22.x"
+  },
+  "scripts": {
+    "dev": "node dev/server.mjs",
+    "test": "node test/run.mjs"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^1.0.1"
+  },
+  "devDependencies": {
+    "pg": "^8.13.0"
+  }
+}
