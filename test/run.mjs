@@ -80,6 +80,9 @@ await test('homepage renders both languages and the coming-soon message', async 
   assert.match(r.data, /Details coming soon/);
   assert.match(r.data, /href="https:\/\/task\.chulafair\.com"/);
   assert.match(r.data, /class="staff-btn"/);
+  assert.match(r.data, /มีนาคม 2570/);
+  assert.match(r.data, /March 2027/);
+  assert.match(r.data, /contact@chulafair\.com/);
 });
 
 await test('seeded survey page exists, is a draft, and 404s for the public', async () => {
@@ -208,6 +211,30 @@ await test('settings: edit homepage text, empty hides a line, junk keys ignored'
   const [junk] = await sql`SELECT 1 FROM site_settings WHERE key = 'not_a_key'`;
   assert.equal(junk, undefined);
   assert.equal((await call('/api/admin?do=settings', { cookie: admin1, body: { values: { instagram_url: 'not a url' } } })).data.error, 'BAD_URL');
+});
+
+await test('sponsors: tiers render in order, empty tiers vanish, whole section can be hidden', async () => {
+  let home = (await call('/')).data;
+  assert.match(home, /รายชื่อผู้สนับสนุนจะประกาศเร็ว ๆ นี้/); // placeholder while empty
+
+  await call('/api/admin?do=settings', { cookie: admin1, body: { values: {
+    sponsor_t1_list: 'บริษัทใหญ่ | https://img.example/big.png | https://big.example',
+    sponsor_t2_list: 'ผู้สนับสนุนสอง\n\nอีกราย | https://img.example/two.png',
+    sponsor_t4_list: 'ร้านเล็ก',
+  } } });
+  home = (await call('/')).data;
+  assert.doesNotMatch(home, /รายชื่อผู้สนับสนุนจะประกาศ/);
+  assert.match(home, /class="tier tier-1"/);
+  assert.match(home, /class="tier tier-2"/);
+  assert.doesNotMatch(home, /class="tier tier-3"/); // left empty
+  assert.match(home, /class="tier tier-4"/);
+  assert.ok(home.indexOf('tier-1') < home.indexOf('tier-2'));
+  assert.match(home, /<img src="https:\/\/img\.example\/big\.png" alt="บริษัทใหญ่"/);
+  assert.match(home, /<span class="sponsor-name">ร้านเล็ก<\/span>/); // no logo yet
+  assert.match(home, /href="https:\/\/big\.example"/);
+
+  await call('/api/admin?do=settings', { cookie: admin1, body: { values: { sponsors_title_th: '', sponsors_title_en: '' } } });
+  assert.doesNotMatch((await call('/')).data, /class="sponsors"/);
 });
 
 await test('preview endpoint renders unsaved content', async () => {

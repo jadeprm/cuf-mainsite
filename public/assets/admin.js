@@ -45,7 +45,8 @@
     TOO_MANY_ATTEMPTS: 'ลองผิดหลายครั้งเกินไป รอประมาณ 15 นาทีแล้วลองใหม่',
     MISSING: 'กรอกชื่อผู้ใช้และรหัสผ่าน',
     NO_DATABASE: 'เว็บไซต์ยังไม่ได้เชื่อมฐานข้อมูล (ดูคู่มือ README)',
-    NO_CUFTM_USERS: 'ไม่พบตารางผู้ใช้ของ CUFTM — ต้องเชื่อมฐานข้อมูลเดียวกับ CUFTM',
+    NO_CUFTM_USERS: 'เชื่อมฐานข้อมูลได้ แต่ไม่ใช่ฐานข้อมูลของ CUFTM',
+    DATABASE_UNREACHABLE: 'เชื่อมต่อฐานข้อมูลไม่ได้ — ตรวจว่าฐานข้อมูลยังทำงานอยู่ แล้วลองรีเฟรช',
     TITLE_REQUIRED: 'ใส่ชื่อหน้าอย่างน้อยหนึ่งภาษา',
     SLUG_REQUIRED: 'ใส่ลิงก์ (slug) ของหน้า',
     SLUG_RESERVED: 'ลิงก์นี้ระบบใช้อยู่แล้ว เลือกชื่ออื่น',
@@ -55,6 +56,41 @@
     NOT_FOUND: 'ไม่พบหน้านี้ (อาจถูกลบไปแล้ว)',
   };
   function errText(d) { return ERR[d.error] || ('เกิดข้อผิดพลาด' + (d.error ? ' (' + d.error + ')' : '')); }
+
+  /* When the deployment cannot see its database, show what it did find —
+     variable names only — because the fix is almost always one of these. */
+  function errBlock(d) {
+    var html = '<p class="error">' + esc(errText(d)) + '</p>';
+    var g = d.diagnosis;
+    if (!g) return html;
+    var names = (g.databaseishVariables || []);
+    var pg = (g.postgresLookingVariables || []);
+    html += '<div class="card diag"><h2>สิ่งที่เซิร์ฟเวอร์มองเห็น</h2>';
+
+    if (g.found) {
+      // A database is connected — just not CUFTM's one.
+      html += '<p>กำลังใช้ตัวแปร <code>' + esc(g.usingVariable) + '</code> ซึ่งเชื่อมไปยังฐานข้อมูลที่<b>ไม่มีตาราง users ของ CUFTM</b></p>';
+      if (pg.length > 1) {
+        html += '<p><b>โปรเจกต์นี้เชื่อมฐานข้อมูลไว้มากกว่าหนึ่งอัน</b> จึงหยิบผิดตัว ตัวแปรที่เจอทั้งหมด:</p>' +
+          '<ul class="mono-list"><li>' + pg.map(function (n) {
+            return esc(n) + (n === g.usingVariable ? '  ← กำลังใช้อันนี้' : '');
+          }).join('</li><li>') + '</li></ul>' +
+          '<p class="muted">วิธีแก้: Vercel → <b>Storage</b> → เปิดฐานข้อมูลที่<i>ไม่ใช่</i>ของ CUFTM →' +
+          ' แท็บ <b>Projects</b> → <b>Remove / Disconnect</b> โปรเจกต์นี้ออก ให้เหลือเชื่อมไว้อันเดียว' +
+          ' แล้ว <b>Redeploy</b></p>';
+      } else {
+        html += '<p class="muted">ตรวจว่าเลือกฐานข้อมูลเดียวกับที่ CUFTM (task.chulafair.com) ใช้อยู่ ไม่ใช่ฐานข้อมูลที่เพิ่งสร้างใหม่</p>';
+      }
+    } else {
+      html += names.length
+        ? '<p>พบตัวแปรที่เกี่ยวกับฐานข้อมูลเหล่านี้ แต่ไม่มีตัวไหนเก็บลิงก์ Postgres ที่ใช้ได้:</p><ul class="mono-list"><li>' + names.map(esc).join('</li><li>') + '</li></ul>'
+        : '<p><b>ไม่พบตัวแปรฐานข้อมูลเลย</b> แปลว่า deployment นี้ถูกสร้างขึ้น<i>ก่อน</i>ที่จะเชื่อมฐานข้อมูล</p>';
+      html += '<p class="muted">วิธีแก้: Vercel → โปรเจกต์นี้ → <b>Storage</b> → ต้องเห็นฐานข้อมูลของ CUFTM อยู่ในรายการ' +
+        ' (ถ้าไม่มี ให้ไปที่ฐานข้อมูลนั้นแล้วกด <b>Connect Project</b>) จากนั้นไปที่ <b>Deployments</b> →' +
+        ' อันบนสุด → <b>⋯ → Redeploy</b> ทุกครั้ง เพราะตัวแปรจะเข้าถึงได้เฉพาะ deployment ที่สร้างหลังจากตั้งค่าแล้วเท่านั้น</p>';
+    }
+    return html + '</div>';
+  }
 
   var ACCENTS = [['pink', 'ชมพู', '#fe5ea0'], ['gold', 'ทอง', '#fdb92e'], ['lavender', 'ลาเวนเดอร์', '#d6adfb'],
     ['sky', 'ฟ้า', '#c1ecff'], ['teal', 'มิ้นต์', '#41ead4'], ['purple', 'ม่วง', '#5e37a8']];
@@ -408,7 +444,7 @@
           var v = d.values[s.key];
           var long = s.multiline || String(v || '').length > 70;
           var input = long
-            ? '<textarea name="' + s.key + '" rows="' + (s.multiline ? 4 : 2) + '">' + esc(v) + '</textarea>'
+            ? '<textarea name="' + s.key + '" rows="' + (s.rows || (s.multiline ? 4 : 2)) + '">' + esc(v) + '</textarea>'
             : '<input name="' + s.key + '" value="' + esc(v) + '">';
           var reset = v !== s.default ? '<button type="button" class="link small" data-reset="' + s.key + '">คืนค่าเดิม</button>' : '';
           return '<label class="field">' + esc(s.label) + reset + input + '</label>';
@@ -445,7 +481,7 @@
 
   // ---------------------------------------------------------------- boot
   api('me').then(function (d) {
-    if (d._status >= 500) { app.innerHTML = '<p class="error">' + esc(errText(d)) + '</p>'; return; }
+    if (d._status >= 500) { app.innerHTML = '<section class="page narrow">' + errBlock(d) + '</section>'; return; }
     state.editor = d.editor || null;
     route();
   });

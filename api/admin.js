@@ -1,5 +1,5 @@
 import { randomBytes } from 'node:crypto';
-import { getSql, hasDatabase } from '../lib/db.js';
+import { getSql, hasDatabase, connectionReport } from '../lib/db.js';
 import { currentEditor, signIn, signOut, sessionCookie } from '../lib/auth.js';
 import {
   SETTINGS, SETTING_GROUPS, ACCENTS, PAGE_FIELDS, RESERVED_SLUGS,
@@ -151,8 +151,22 @@ const nameOf = async (sql, username) => {
 };
 
 export default async function handler(req, res) {
-  if (!hasDatabase) return json(res, 503, { error: 'NO_DATABASE' });
-  const sql = await getSql();
+  // Without a database there is nothing to serve, and the usual cause is an
+  // environment variable that never reached this deployment. Say what was
+  // actually found — variable NAMES only, never their values — so the fix is
+  // visible from the page instead of guessed at.
+  if (!hasDatabase) return json(res, 503, { error: 'NO_DATABASE', diagnosis: connectionReport() });
+
+  // A database that is configured but unreachable — Neon asleep, a bad
+  // password, a network blip — must answer with something the page can
+  // explain, not a crashed function.
+  let sql;
+  try {
+    sql = await getSql();
+  } catch (error) {
+    console.error('[admin] cannot reach the database', error);
+    return json(res, 503, { error: 'DATABASE_UNREACHABLE', message: String(error?.message || error) });
+  }
   const url = new URL(req.url || '/', 'http://local');
   const action = url.searchParams.get('do') || 'me';
   const isPost = req.method === 'POST';
@@ -161,7 +175,12 @@ export default async function handler(req, res) {
 
   // Without CUFTM's tables there is nobody who could sign in.
   const [{ ok: hasUsers }] = await sql`SELECT to_regclass('public.users') IS NOT NULL AS ok`;
-  if (!hasUsers) return json(res, 503, { error: 'NO_CUFTM_USERS' });
+  if (!hasUsers) {
+    // Connected to a database, but not CUFTM's. Naming the variable in use is
+    // what makes this fixable: with more than one database connected to the
+    // project, the only visible symptom is which one got picked.
+    return json(res, 503, { error: 'NO_CUFTM_USERS', diagnosis: connectionReport() });
+  }
 
   if (action === 'login' && isPost) {
     const body = await readBody(req);

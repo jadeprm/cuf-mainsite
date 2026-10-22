@@ -26,15 +26,59 @@
   --text-soft: #5b4a86;
   --line: rgba(45, 19, 95, .12);
 
-  --font-th: "Anuphan", "IBM Plex Sans Thai", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-text: "Jost", "Anuphan", "IBM Plex Sans Thai", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-display: "MuseoModerno", "Anuphan", "IBM Plex Sans Thai", system-ui, sans-serif;
+  /* Thai type, per the CI deck:
+       หัวเรื่อง (headline) = ArchTH        — Arch, Typomancer (Warit Chaiyakul)
+       เนื้อความ (body)     = UID ทองหล่อ   — Thonglor, Cadson Demak
+     Both are commercial and are NOT bundled with this project. They are named
+     first in each stack, so anyone who has them installed — and the site
+     itself, once licensed .woff2 files are added — gets the real CI faces.
+     See public/fonts/อ่านก่อน.txt for how to switch them on.
+
+     Until then the site uses two free stand-ins chosen to match:
+       Mitr (Cadson Demak) — loopless and geometric, like ArchTH, and built to
+         sit beside geometric Latin such as MuseoModerno
+       IBM Plex Sans Thai Looped — a modern looped text face, the same category
+         as Thonglor, and readable at small sizes */
+  --font-th-display: "ArchTH", "Arch", "Mitr", "Anuphan", "Noto Sans Thai", system-ui, sans-serif;
+  --font-th: "UID Thonglor", "Thonglor", "IBM Plex Sans Thai Looped", "Noto Sans Thai Looped", "IBM Plex Sans Thai", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-text: "Jost", "UID Thonglor", "Thonglor", "IBM Plex Sans Thai Looped", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "MuseoModerno", "ArchTH", "Arch", "Mitr", system-ui, sans-serif;
+  /* Mitr stops at 600, so Thai headings ask for 600 rather than 700/800. */
+  --w-th-head: 600;
 
   --radius: 22px;
   --wrap: 1120px;
   --accent: var(--pink);
   --accent-2: var(--pink-soft);
 }
+
+
+/* ---------------------------------------------------------------- CI fonts
+   Switch on the real CI faces by putting licensed .woff2 files in
+   /public/fonts and deleting the two comment markers around the rules below.
+   Nothing else has to change: both families are already first in their stacks.
+
+@font-face {
+  font-family: "ArchTH";
+  src: url("/fonts/archth-regular.woff2") format("woff2");
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "ArchTH";
+  src: url("/fonts/archth-bold.woff2") format("woff2");
+  font-weight: 600 700; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "UID Thonglor";
+  src: url("/fonts/thonglor-regular.woff2") format("woff2");
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "UID Thonglor";
+  src: url("/fonts/thonglor-bold.woff2") format("woff2");
+  font-weight: 600 700; font-style: normal; font-display: swap;
+}
+*/
 
 *, *::before, *::after { box-sizing: border-box; }
 html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
@@ -50,12 +94,12 @@ body {
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
-html[data-lang="th"] body { font-family: var(--font-th); font-size: 16.5px; line-height: 1.8; }
+html[data-lang="th"] body { font-family: var(--font-th); font-size: 17px; line-height: 1.85; }
 
 img { max-width: 100%; height: auto; }
 a { color: inherit; }
 h1, h2, h3 { font-family: var(--font-display); line-height: 1.2; margin: 0 0 .5em; letter-spacing: -.01em; }
-html[data-lang="th"] h1, html[data-lang="th"] h2, html[data-lang="th"] h3 { font-family: var(--font-th); font-weight: 700; letter-spacing: 0; line-height: 1.35; }
+html[data-lang="th"] h1, html[data-lang="th"] h2, html[data-lang="th"] h3 { font-family: var(--font-th-display); font-weight: var(--w-th-head); letter-spacing: 0; line-height: 1.35; }
 
 .wrap { width: min(var(--wrap), 100% - 32px); margin-inline: auto; }
 .wrap.narrow { width: min(760px, 100% - 32px); }
@@ -83,7 +127,7 @@ html[data-lang="th"] h1, html[data-lang="th"] h2, html[data-lang="th"] h3 { font
 }
 .brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; font-weight: 700; }
 .brand-word { font-family: var(--font-display); font-size: 19px; letter-spacing: .01em; }
-html[data-lang="th"] .brand-word { font-family: var(--font-th); }
+html[data-lang="th"] .brand-word { font-family: var(--font-th-display); font-weight: var(--w-th-head); }
 .brand-mark {
   position: relative; width: 30px; height: 30px; border-radius: 50%;
   background: radial-gradient(circle at 50% 100%, var(--cream) 0 22%, var(--gold) 38%, var(--pink) 62%, var(--violet) 100%);
@@ -205,7 +249,7 @@ body:has(.preview-bar) .site-header { top: 38px; }
   margin: 0 0 10px; opacity: .9;
 }
 .hero-title {
-  font-family: var(--font-th) !important; font-weight: 700;
+  font-family: var(--font-th-display) !important; font-weight: var(--w-th-head);
   font-size: clamp(64px, 15vw, 188px); line-height: 1.05; margin: 0;
   background: linear-gradient(180deg, #fffef4 20%, #ffe58f 62%, var(--gold) 100%);
   -webkit-background-clip: text; background-clip: text; color: transparent;
@@ -227,7 +271,7 @@ html[data-lang="en"] .hero-title { font-family: var(--font-display) !important; 
   box-shadow: 0 0 0 6px rgba(255, 253, 231, .25), 0 10px 40px rgba(45, 19, 95, .35);
   transition: transform .2s;
 }
-html[data-lang="th"] .soon-pill { font-family: var(--font-th); }
+html[data-lang="th"] .soon-pill { font-family: var(--font-th-display); font-weight: var(--w-th-head); }
 .soon-pill:hover { transform: translateY(-2px); }
 .pulse { position: relative; width: 12px; height: 12px; border-radius: 50%; background: var(--pink); }
 .pulse::after {
@@ -276,7 +320,7 @@ html[data-lang="th"] .eyebrow { font-family: var(--font-th); letter-spacing: .08
   background: linear-gradient(90deg, var(--violet), var(--pink) 45%, #f39a16);
   -webkit-background-clip: text; background-clip: text; color: transparent;
 }
-html[data-lang="th"] .soon-title { font-family: var(--font-th); font-weight: 700; line-height: 1.3; }
+html[data-lang="th"] .soon-title { font-family: var(--font-th-display); font-weight: var(--w-th-head); line-height: 1.3; }
 .soon-title.small { font-size: clamp(26px, 4vw, 40px); }
 .soon-body { max-width: 56ch; margin: 0 auto; font-size: clamp(16px, 1.8vw, 19px); color: var(--text-soft); }
 
@@ -338,6 +382,7 @@ html[data-lang="th"] .stamp { font-family: var(--font-th); text-transform: none;
   box-shadow: 0 0 0 6px rgba(254, 94, 160, .14), 0 8px 22px rgba(254, 94, 160, .35);
 }
 .fair-name { margin: 0; font-family: var(--font-display); font-size: 18px; line-height: 1.3; }
+html[data-lang="th"] .fair-desc { font-family: var(--font-th); }
 .fair-name strong { color: var(--pink); }
 .fair-desc { margin: 2px 0 0; color: var(--text-soft); font-size: 15px; }
 
@@ -348,7 +393,7 @@ html[data-lang="th"] .stamp { font-family: var(--font-th); text-transform: none;
 }
 .story-quote {
   position: relative; margin: 0 auto; max-width: 24ch; white-space: pre-line; text-wrap: balance;
-  font-family: var(--font-th); font-weight: 600; font-size: clamp(28px, 4.8vw, 54px); line-height: 1.35;
+  font-family: var(--font-th-display); font-weight: var(--w-th-head); font-size: clamp(28px, 4.8vw, 54px); line-height: 1.35;
 }
 html[data-lang="en"] .story-quote { font-family: var(--font-display); font-weight: 700; }
 .story-sign { position: relative; margin: 22px 0 0; font: 600 15px/1 var(--font-text); letter-spacing: .14em; text-transform: uppercase; color: var(--cream); opacity: .85; }
@@ -379,7 +424,7 @@ html[data-lang="en"] .story-quote { font-family: var(--font-display); font-weigh
 .post-cover i::after { content: ""; position: absolute; left: 0; right: 0; top: 78%; height: 1.5px; background: var(--cream); box-shadow: 0 0 12px #fff; }
 .post-meta { padding: 16px 20px 0; font-size: 13px; color: var(--text-soft); }
 .post-title { padding: 4px 20px 0; font-family: var(--font-display); font-weight: 700; font-size: 21px; line-height: 1.3; }
-html[data-lang="th"] .post-title { font-family: var(--font-th); }
+html[data-lang="th"] .post-title { font-family: var(--font-th-display); font-weight: var(--w-th-head); }
 .post-summary { padding: 6px 20px 20px; font-size: 15px; color: var(--text-soft); line-height: 1.6; }
 .post-title:last-child { padding-bottom: 20px; }
 
@@ -415,7 +460,7 @@ html[data-lang="th"] .post-title { font-family: var(--font-th); }
 .notice-strong { background: #fff6dc; border: 2px solid var(--gold); box-shadow: 0 10px 30px rgba(253, 185, 46, .2); }
 .notice-strong .notice-icon { background: var(--gold); }
 .notice-head { font-family: var(--font-display); font-weight: 800; font-size: 20px; margin-bottom: 4px !important; color: #b4520a; }
-html[data-lang="th"] .notice-head { font-family: var(--font-th); }
+html[data-lang="th"] .notice-head { font-family: var(--font-th-display); font-weight: var(--w-th-head); }
 .fine { text-align: center; font-size: 14px; color: var(--text-soft); margin-top: 10px; }
 
 .btn {
@@ -437,6 +482,70 @@ html[data-lang="th"] .btn { font-family: var(--font-th); }
 
 .empty { text-align: center; padding: 30px 0; color: var(--text-soft); }
 
+/* ------------------------------------------------------------- sponsors */
+
+.sponsors { background: linear-gradient(180deg, var(--cream) 0%, #fff6fb 50%, var(--cream) 100%); }
+.sponsors-head { text-align: center; margin-bottom: clamp(28px, 4vw, 48px); }
+.sponsors-head h2 { font-size: clamp(28px, 4vw, 42px); margin: 0 0 10px; }
+.sponsors-intro { margin: 0 auto; max-width: 48ch; color: var(--text-soft); }
+
+.tier + .tier { margin-top: clamp(28px, 4vw, 46px); }
+.tier-label {
+  display: flex; align-items: center; gap: 14px;
+  margin: 0 0 18px; text-align: center; justify-content: center;
+  font: 600 13px/1 var(--font-text); letter-spacing: .2em; text-transform: uppercase; color: var(--violet);
+}
+html[data-lang="th"] .tier-label { font-family: var(--font-th); letter-spacing: .06em; text-transform: none; font-size: 15px; }
+.tier-label::before, .tier-label::after {
+  content: ""; flex: 1; max-width: 120px; height: 1.5px;
+  background: linear-gradient(90deg, transparent, var(--lavender));
+}
+.tier-label::after { background: linear-gradient(90deg, var(--lavender), transparent); }
+
+.tier-logos {
+  list-style: none; margin: 0; padding: 0;
+  display: flex; flex-wrap: wrap; justify-content: center; align-items: center;
+  gap: var(--gap, 20px);
+}
+.sponsor {
+  display: grid; place-items: center;
+  background: #fff; border: 1px solid var(--line); border-radius: 18px;
+  padding: var(--pad, 18px) calc(var(--pad, 18px) * 1.4);
+  min-width: var(--min, 180px); min-height: var(--box, 96px);
+  box-shadow: 0 8px 24px rgba(45, 19, 95, .06);
+  transition: transform .2s, box-shadow .2s;
+}
+.sponsor a { display: grid; place-items: center; width: 100%; height: 100%; text-decoration: none; }
+.sponsor:has(a):hover { transform: translateY(-2px); box-shadow: 0 14px 32px rgba(45, 19, 95, .12); }
+.sponsor img { max-height: var(--logo, 64px); max-width: 100%; width: auto; object-fit: contain; }
+.sponsor-name {
+  font-weight: 600; font-size: var(--name, 18px); line-height: 1.35;
+  text-align: center; color: var(--ink);
+}
+
+/* Each tier a step smaller than the one above it. */
+.tier-1 { --logo: 104px; --box: 168px; --min: 300px; --pad: 26px; --gap: 24px; --name: 24px; }
+.tier-2 { --logo: 72px;  --box: 126px; --min: 224px; --pad: 20px; --gap: 20px; --name: 20px; }
+.tier-3 { --logo: 52px;  --box: 96px;  --min: 168px; --pad: 16px; --gap: 16px; --name: 17px; }
+.tier-4 { --logo: 36px;  --box: 70px;  --min: 126px; --pad: 12px; --gap: 12px; --name: 14.5px; }
+.tier-1 .sponsor { border-width: 2px; border-color: var(--lavender); box-shadow: 0 14px 40px rgba(254, 94, 160, .14); }
+.tier-4 .sponsor { border-radius: 14px; }
+
+.sponsors-empty {
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  margin: 0 auto; max-width: 560px; padding: 28px 24px; text-align: center;
+  border: 2px dashed var(--lavender); border-radius: 22px;
+  color: var(--text-soft); background: rgba(255, 255, 255, .6);
+}
+
+@media (max-width: 720px) {
+  .tier-1 { --min: 100%; --logo: 76px; --box: 132px; }
+  .tier-2 { --min: 46%; --logo: 54px; --box: 100px; }
+  .tier-3 { --min: 44%; --logo: 42px; --box: 82px; }
+  .tier-4 { --min: 28%; --logo: 30px; --box: 62px; }
+  .sponsor { padding: 14px; }
+}
+
 /* ----------------------------------------------------------------- footer */
 
 .site-footer {
@@ -447,7 +556,7 @@ html[data-lang="th"] .btn { font-family: var(--font-th); }
 .footer-inner, .footer-base { position: relative; width: min(var(--wrap), 100% - 32px); margin-inline: auto; }
 .footer-inner { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 24px; }
 .footer-title { font: 700 26px/1.2 var(--font-display); margin: 0; color: #fff; }
-html[data-lang="th"] .footer-title { font-family: var(--font-th); }
+html[data-lang="th"] .footer-title { font-family: var(--font-th-display); font-weight: var(--w-th-head); }
 .footer-tag { margin: 6px 0 0; font: 600 13px/1 var(--font-text); letter-spacing: .16em; text-transform: uppercase; color: var(--pink-soft); }
 .footer-links p { margin: 0 0 8px; }
 .footer-links a { color: #fff; }
